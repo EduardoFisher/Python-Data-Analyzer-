@@ -100,6 +100,8 @@ if os.path.isdir(path) == False:
     os.mkdir(path) 
     print("Directory '% s' created" % directory) 
 
+print(os.listdir(os.getcwd()))
+
 # Create a list of all the text files in the the folder.
 txtfiles = []
 for file in glob.glob("*.txt"):
