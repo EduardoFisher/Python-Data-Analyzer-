@@ -6,6 +6,10 @@ import re
 from scipy import signal
 # importing os module 
 import os 
+# importing math
+import math
+# importing statistics 
+import statistics
 
 #fs = 1000  # Sampling frequency
 #fc = 30  # Cut-off frequency of the filter
@@ -39,25 +43,27 @@ def filterData(mainList):
         sublist.clear()
     return newMainList
 
-# This function will calculate the Cop values for one block of values.
-# This function takes a List[][] but will only get passed List[i] i.e List[0] and will work only with List[0][j] or whatever List[i] is passed in
-# This fucntion will return two seperate Lists one of them being Copx and the other being Copy.
+# This function will calculate the CopX and CopY values.
+# This function will take MX, MY and FZ
 # Returns Copx first and then Copy
-def calcCop(values):
-    _copX = [] # Calculated like: -My/Fz
-    _copY = [] # Calculated like: Mx/Fz
-    for i in values:
-        # print(-i[6])
-        # print(i[4])
-        _copX.append(-i[4]/i[2])
-        _copY.append(i[3]/i[2])
-        #print("Copx: " + str(-i[4]/i[2]))
-        #print("Copy: " + str(i[3]/i[2]))
+def calcCop(mx, my, fz):
+    _copX, _copY = 0, 0
+    _copX = -my/fz
+    _copY = mx/fz
     return _copX, _copY
 
 
-def calculateDisplacement(CopXA, CopXB):
-    return abs(CopXB - CopXA)
+def calculateDisplacement(CopA, CopB):
+    return abs(CopB - CopA)
+
+#def calculateVelocity(CopA, CopB, TimeA, TimeB):
+#    return (CopB - CopA)/(TimeB - TimeA)
+
+def calculateVelocity(Displacement, TimeA, TimeB):
+    return Displacement/(TimeB - TimeA)
+
+def calculatePathlength(displacementXA, displacementYA):
+    return (math.sqrt(pow(displacementXA, 2) + pow(displacementYA, 2)))
 
 
 # This is the main function that will calcualate all the extra values will need for each block of values.
@@ -73,18 +79,22 @@ def calculateValues(lineOfValues, timeValues):
     # [5] = Mz
     # [6] = CopX
     # [7] = CopY
-    copX = [] #Calculated like: -My/Fz
-    copY = [] #Calculated like: Mx/Fz
-    copX, copY = calcCop(lineOfValues[0])
     
-    print("Copx Max(Max AP): ", max(copX))
-    print("Copx Min: ", min(copX))
-    print("Copy Max(Max ML): ", max(copY))
-    print("Copy Min: ", min(copY))
-    print("Printing the displacement:")
-    #for x in range(len(copX)-1):
-    #    print(calculateDisplacement(copX[x], copX[x+1]))
-    return 
+    print(len(lineOfValues))
+    print(len(timeValues))
+    displacementX = []
+    displacementY = []
+    velocityX = []
+    velocityY = []
+    pathlength = []
+    # Run a for loop with the range through one of the lists it shouldn't matter which one you choose because they should both be the same side.
+    for index in range(len(lineOfValues) - 1):
+        displacementX.append(calculateDisplacement(lineOfValues[index][6], lineOfValues[index + 1][6]))
+        displacementY.append(calculateDisplacement(lineOfValues[index][7], lineOfValues[index + 1][7]))
+        velocityX.append(calculateVelocity(displacementX[index], timeValues[index], timeValues[index + 1]))
+        velocityY.append(calculateVelocity(displacementY[index], timeValues[index], timeValues[index + 1]))
+        pathlength.append(calculatePathlength(displacementX[index], displacementY[index]))
+    return displacementX, displacementY, velocityX, velocityY, pathlength
 
 # Creating the directory that we will be putting the new files into. 
 # Directory 
@@ -93,7 +103,6 @@ directory = "Calculation Files"
 parent_dir = os.getcwd()
 # Path 
 path = os.path.join(parent_dir, directory)
-
 # Create the directory 
 # 'Calculation Files' in 
 # '/home / User / Documents' 
@@ -111,7 +120,7 @@ for file in glob.glob("*.txt"):
 
 #print(txtfiles)
 for Tfile in txtfiles:
-    Tfile = Tfile.replace('.txt', 'CalculatedFile.txt')
+    Tfile = Tfile.replace('.txt', '_CalculatedFile.txt')
     print(Tfile)
 # We probably want to start transtioning when 
 # Open each file.
@@ -122,6 +131,7 @@ mainList = []# We will be doing all of our calculations on this list.
 timeList = [] # We will hold all the times on here.
 timeSubList = [] 
 subList = []
+maxApCopX, maxMLCopY = 0, 0
 # Go throught each of the lines and using the Regex below to parse each string. 
 for line in f1:
     res = re.findall(r"[-+]?\d*\.\d+|\d+", line)
@@ -136,8 +146,11 @@ for line in f1:
         timestamp = res.pop(0)
         timeSubList.append(timestamp)
         # Calculate COPX and COPY before hand and place it in the subList.
-        res.append(-(res[4])/(res[2])) # COPX at position [6]
-        res.append((res[3])/(res[2]))  # COPY at position [7]
+        copx, copy = calcCop(res[3], res[4], res[2])
+        maxApCopX = max(maxApCopX, copx)
+        maxMLCopY = max(maxMLCopY, copy)
+        res.append(copx) # COPX at position [6], -My/Fz
+        res.append(copy)  # COPY at position [7], Mx/Fz
         subList.append(res)
     # When we are finally see a 2.0 when can put everything we just put into subList to our mainList.
     elif len(res) != 0 and res[0] == 2.0:
@@ -168,8 +181,25 @@ fw.close()
 #print("Before Filtering:")
 #calculateValues(mainList)
 #print("After Filtering:")
-filterData(mainList)
-#calculateValues(filterData(mainList), timeList)
+#filterData(mainList)
+displacementX = []
+displacementY = []
+velocityX = []
+velocityY = []
+pathLength = []
+maxVelocityX, maxVelocityY = 0, 0
+minVelocityX, minVelocityY = 0, 0
+meanVelocityX, meanVelocityY = 0, 0
+filteredList = filterData(mainList)
+index = 0
+for stage in filteredList:
+    displacementX, displacementY, velocityX, velocityY, pathLength = calculateValues(stage, timeList[index])
+    maxVelocityX = max(velocityX)
+    maxVelocityY = max(velocityY)
+    meanVelocityX = statistics.mean(velocityX)
+    meanVelocityY = statistics.mean(velocityY)
+    index = index + 1
+    break
 
 '''
 newlist = filterData(mainList)
@@ -193,7 +223,7 @@ for file in glob.glob("*.txt"):
 '''
 JUST AS NOTES FOR NOW:
 STEP 1):
-break the data up into x,y,z,mx,my,mz,copx,copy
+break the data up into x,y,z,mx,my,mz,copx,copy DONE
 STEP 2):
 Filter the data DONE 
 STEP 3):
