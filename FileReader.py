@@ -33,7 +33,7 @@ def filterData(mainList):
         sublist = []
         for j in x:
             if x != None:
-                subList.append(list(signal.filtfilt(b, a, j, padlen=5)))
+                subList.append(list(signal.filtfilt(b, a, j, padlen=7)))
                 #print(list(signal.filtfilt(b, a, j, padlen=5)))
         newMainList.append(list(subList))
         sublist.clear()
@@ -61,16 +61,18 @@ def calculateDisplacement(CopXA, CopXB):
 
 
 # This is the main function that will calcualate all the extra values will need for each block of values.
-def calculateValues(lineOfValues):
+def calculateValues(lineOfValues, timeValues):
     # Step #1 find COPx and COPy.
     # NOTE: the lineOfValues[i] looks like this: 
-    # [0] = TimeStamp
-    # [1] = Fx
-    # [2] = Fy
-    # [3] = Fz
-    # [4] = Mx
-    # [5] = My
-    # [6] = Mz 
+    # [0] = TimeStamp on its own list
+    # [0] = Fx
+    # [1] = Fy
+    # [2] = Fz
+    # [3] = Mx
+    # [4] = My
+    # [5] = Mz
+    # [6] = CopX
+    # [7] = CopY
     copX = [] #Calculated like: -My/Fz
     copY = [] #Calculated like: Mx/Fz
     copX, copY = calcCop(lineOfValues[0])
@@ -100,23 +102,25 @@ if os.path.isdir(path) == False:
     os.mkdir(path) 
     print("Directory '% s' created" % directory) 
 
-print(os.listdir(os.getcwd()))
+#print(os.listdir(os.getcwd()))
 
 # Create a list of all the text files in the the folder.
 txtfiles = []
 for file in glob.glob("*.txt"):
     txtfiles.append(file)
 
-print(txtfiles)
+#print(txtfiles)
 for Tfile in txtfiles:
-    Tfile = Tfile.replace('.txt', '')
-    print(Tfile + '.txt')
+    Tfile = Tfile.replace('.txt', 'CalculatedFile.txt')
+    print(Tfile)
 # We probably want to start transtioning when 
 # Open each file.
 f = open("BeforeDemoTest001Just a test.txt", "r") #Opens each file we are going to work with. 
 # Read from the file line by line.
 f1 = f.readlines()
 mainList = []# We will be doing all of our calculations on this list.
+timeList = [] # We will hold all the times on here.
+timeSubList = [] 
 subList = []
 # Go throught each of the lines and using the Regex below to parse each string. 
 for line in f1:
@@ -130,12 +134,18 @@ for line in f1:
         # Append res to our subList.
         res.pop(0)
         timestamp = res.pop(0)
+        timeSubList.append(timestamp)
+        # Calculate COPX and COPY before hand and place it in the subList.
+        res.append(-(res[4])/(res[2])) # COPX at position [6]
+        res.append((res[3])/(res[2]))  # COPY at position [7]
         subList.append(res)
     # When we are finally see a 2.0 when can put everything we just put into subList to our mainList.
     elif len(res) != 0 and res[0] == 2.0:
         if len(subList) != 0:
             # Putting a copy of it in mainList so when we clear it we don't delete the list.
             mainList.append(list(subList))
+            timeList.append(list(timeSubList))
+            timeSubList.clear()
             subList.clear()
 f.close()
         
@@ -158,17 +168,39 @@ fw.close()
 #print("Before Filtering:")
 #calculateValues(mainList)
 #print("After Filtering:")
-calculateValues(filterData(mainList))
+filterData(mainList)
+#calculateValues(filterData(mainList), timeList)
+
 '''
 newlist = filterData(mainList)
-i = 0
 for x in newlist:
     for j in x:
         print(j)
-    break
+    print("========================================================================================================================\n")
 '''
-
+'''
+for x in timeList:
+    for j in x:
+        print(j)
+    print("========================================================================================================================\n")
+'''
 txtfiles = []
 for file in glob.glob("*.txt"):
     txtfiles.append(file)
 #print(txtfiles)
+
+
+'''
+JUST AS NOTES FOR NOW:
+STEP 1):
+break the data up into x,y,z,mx,my,mz,copx,copy
+STEP 2):
+Filter the data DONE 
+STEP 3):
+Find Max AP (Copx) and Max ML (Copy) per stage
+Max Velocity Copx and Max Velocity Copy 
+Displacement of X Velocity of X, Displacement of Y Velocity of Y 
+Get the MAX and MEAN for each   
+STEP 4):
+FIND path length between time 2 and time 1
+'''
