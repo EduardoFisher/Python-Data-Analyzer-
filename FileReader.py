@@ -234,3 +234,27 @@ Get the MAX and MEAN for each
 STEP 4):
 FIND path length between time 2 and time 1
 '''
+'''
+NOTE on how to create files in another direcotry:
+# Creating the directory that we will be putting the new files into. 
+# Directory 
+directory = "Calculation Files"
+filename = "testy.txt"
+# Parent Directory path 
+parent_dir = os.getcwd()
+
+# Path 
+path = os.path.join(parent_dir, directory)
+
+# Create the directory 
+# 'Calculation Files' in 
+# '/home / User / Documents' 
+#print(os.path.isdir(path))
+if os.path.isdir(path) == False:
+    os.mkdir(path) 
+    print("Directory '% s' created" % directory) 
+
+completeName = os.path.join(path, filename)
+file1 = open(completeName, "w")
+file1.close()
+'''
