@@ -200,7 +200,8 @@ for stage in filteredList:
     meanVelocityY = statistics.mean(velocityY)
     index = index + 1
     break
-
+asbDisplacementX = [abs(value) for value in displacementX]
+asbDisplacementY = [abs(value) for value in displacementY]
 '''
 newlist = filterData(mainList)
 for x in newlist:
@@ -219,8 +220,10 @@ for file in glob.glob("*.txt"):
     txtfiles.append(file)
 #print(txtfiles)
 
-print("Time Length: ", len(timeList))
-print("DisplacementX: ", len(displacementX))
+#print("Time Length: ", len(timeList))
+#print("DisplacementX: ", len(displacementX))
+#print("absdisplacement :", len(asbDisplacementX))
+#[print(asbDisplacementX[i]) for i in range(len(asbDisplacementX))]
 completeName = os.path.join(path, newFileName[0])
 file1 = open(completeName, "w")
 file1.write("Time\t\t CoPx\t\t Distance(d)\t\t Abs Distance\t\t Velocity\n")
@@ -229,10 +232,13 @@ for i in range(len(timeList[0])):
         file1.write(str(timeList[0][i]) + '\t' + str(round(filteredList[0][i][6], 4)) + '\n')
     else:
         file1.write(str(timeList[0][i]) + '\t' + str(round(filteredList[0][i][6], 4)) + '\t\t\t' +
-        str(round(displacementX[i-1], 4)) + '\t\t\t' + str(abs(round(displacementX[i-1], 4))) +
+        str(round(displacementX[i-1], 4)) + '\t\t\t' + str(round(asbDisplacementX[i-1], 4)) +
         '\t\t\t\t' + str(round(velocityX[i-1], 4)) +"\n")
-file1.write("Max range is: " + str(max(displacementX)) + "\n")
 
+file1.write("Max Range is: " + str(max(asbDisplacementX)) + "\n")
+file1.write("Mean Range is: " + str(statistics.mean(asbDisplacementX)) + "\n")
+file1.write("Peak Velocity is: " + str(max(velocityX)) + "\n")
+file1.write("Mean Velocity is: " + str(statistics.mean(velocityX)) + "\n")
 
 file1.write("\nTime\t\t CoPy\t\t Distance(d)\t\t Abs Distance\t\t Velocity\n")
 for i in range(len(timeList[0])):
@@ -240,8 +246,12 @@ for i in range(len(timeList[0])):
         file1.write(str(timeList[0][i]) + '\t' + str(round(filteredList[0][i][7], 4)) + '\n')
     else:
         file1.write(str(timeList[0][i]) + '\t' + str(round(filteredList[0][i][7], 4)) + '\t\t\t' +
-        str(round(displacementY[i-1], 4)) + '\t\t\t' + str(abs(round(displacementY[i-1], 4))) +
+        str(round(displacementY[i-1], 4)) + '\t\t\t' + str(abs(round(asbDisplacementY[i-1], 4))) +
         '\t\t\t\t' + str(round(velocityY[i-1], 4)) +"\n")
+file1.write("Max Range is: " + str(max(displacementY)) + "\n")
+file1.write("Mean Range is: " + str(statistics.mean(displacementY)) + "\n")
+file1.write("Peak Velocity is: " + str(max(velocityY)) + "\n")
+file1.write("Mean Velocity is: " + str(statistics.mean(velocityY)) + "\n")
 file1.close()
 
 '''

@@ -135,7 +135,10 @@ Time		 CoPx		 Distance(d)		 Abs Distance		 Velocity
 191108.0	1.0504			-5.2195			5.2195				-0.2351
 191130.2	1.5172			0.4668			0.4668				0.021
 191152.7	1.9885			0.4713			0.4713				0.0209
-Max range is: 111.05268022833216
+Max Range is: 150.2447706972574
+Mean Range is: 4.740158465739248
+Peak Velocity is: 4.979940817410099
+Mean Velocity is: -0.0021175793745731464
 
 Time		 CoPy		 Distance(d)		 Abs Distance		 Velocity
 188155.0	0.6384
@@ -274,3 +277,7 @@ Time		 CoPy		 Distance(d)		 Abs Distance		 Velocity
 191108.0	1.033			-5.1769			5.1769				-0.2332
 191130.2	1.4974			0.4643			0.4643				0.0209
 191152.7	1.9667			0.4693			0.4693				0.0209
+Max Range is: 106.85147502039065
+Mean Range is: 0.009839011076188234
+Peak Velocity is: 4.791545965036187
+Mean Velocity is: -0.002011083199775058
