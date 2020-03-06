@@ -229,8 +229,8 @@ for i in range(len(timeList[0])):
         file1.write(str(timeList[0][i]) + '\t' + str(round(filteredList[0][i][6], 4)) + '\n')
     else:
         file1.write(str(timeList[0][i]) + '\t' + str(round(filteredList[0][i][6], 4)) + '\t\t\t' +
-        str(round(displacementX[i-1], 2)) + '\t\t\t' + str(abs(round(displacementX[i-1], 2))) +
-        '\t\t\t\t' + str(round(velocityX[i-1], 2)) +"\n")
+        str(round(displacementX[i-1], 4)) + '\t\t\t' + str(abs(round(displacementX[i-1], 4))) +
+        '\t\t\t\t' + str(round(velocityX[i-1], 4)) +"\n")
 file1.close()
 
 '''
