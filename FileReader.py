@@ -54,7 +54,7 @@ def calcCop(mx, my, fz):
 
 
 def calculateDisplacement(CopA, CopB):
-    return abs(CopB - CopA)
+    return CopB - CopA
 
 #def calculateVelocity(CopA, CopB, TimeA, TimeB):
 #    return (CopB - CopA)/(TimeB - TimeA)
@@ -118,13 +118,13 @@ txtfiles = []
 for file in glob.glob("*.txt"):
     txtfiles.append(file)
 
-#print(txtfiles)
+newFileName = []
 for Tfile in txtfiles:
-    Tfile = Tfile.replace('.txt', '_CalculatedFile.txt')
-    print(Tfile)
+    newFileName.append(Tfile.replace('.txt', '_CalculatedFile.txt'))
 # We probably want to start transtioning when 
 # Open each file.
-f = open("BeforeDemoTest001Just a test.txt", "r") #Opens each file we are going to work with. 
+f = open(txtfiles[0], "r")
+#f = open("BeforeDemoTest001Just a test.txt", "r") #Opens each file we are going to work with. 
 # Read from the file line by line.
 f1 = f.readlines()
 mainList = []# We will be doing all of our calculations on this list.
@@ -219,6 +219,19 @@ for file in glob.glob("*.txt"):
     txtfiles.append(file)
 #print(txtfiles)
 
+print("Time Length: ", len(timeList))
+print("DisplacementX: ", len(displacementX))
+completeName = os.path.join(path, newFileName[0])
+file1 = open(completeName, "w")
+file1.write("Time\t\t CoPx\t\t Distance(d)\t\t Abs Distance\t\t Velocity\n")
+for i in range(len(timeList[0])):
+    if i == 0:
+        file1.write(str(timeList[0][i]) + '\t' + str(round(filteredList[0][i][6], 4)) + '\n')
+    else:
+        file1.write(str(timeList[0][i]) + '\t' + str(round(filteredList[0][i][6], 4)) + '\t\t\t' +
+        str(round(displacementX[i-1], 2)) + '\t\t\t' + str(abs(round(displacementX[i-1], 2))) +
+        '\t\t\t\t' + str(round(velocityX[i-1], 2)) +"\n")
+file1.close()
 
 '''
 JUST AS NOTES FOR NOW:
@@ -233,6 +246,26 @@ Displacement of X Velocity of X, Displacement of Y Velocity of Y
 Get the MAX and MEAN for each   
 STEP 4):
 FIND path length between time 2 and time 1
+STEP 5):
+output might look like this?
+CoPx
+Time    CoPx    Distance (d)  Abs Distance    Velocity
+t1      -          -            -               -
+t2      Copx1   t2 - t1       Abs(d1)         d1/(t2-t1)
+.
+.
+.
+
+Max Range = Max of Abs distance column
+Mean Range = Mean of abs distance column
+
+Peak Velocity = Max of Velocity column
+Mean Velocity = Mean of Velocity column
+
+*repeat these calculations for CoPY
+~Calculate path length
+#repeat all calculations for both AP and ML
+
 '''
 '''
 NOTE on how to create files in another direcotry:
